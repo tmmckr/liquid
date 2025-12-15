@@ -10,36 +10,38 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Sanfte Animation für Buttons */
         .btn-press:active { transform: scale(0.95); }
+        /* Lade-Animation */
+        .loading-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700">
+    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700 relative">
         
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center relative z-10">
             <h1 class="text-2xl font-bold tracking-wider uppercase">Liquid Lager</h1>
-            <p class="text-blue-100 text-sm opacity-80 mt-1">Niemals auf dem Trockenen sitzen</p>
+            <p id="connection-status" class="text-blue-100 text-xs opacity-80 mt-1">Verbinde mit Firebase...</p>
         </div>
 
-        <div id="status-banner" class="hidden bg-red-500/20 text-red-200 p-3 text-center text-sm font-semibold border-b border-red-500/20">
+        <div id="status-banner" class="hidden bg-red-500/20 text-red-200 p-3 text-center text-sm font-semibold border-b border-red-500/20 transition-all">
             ⚠️ Bestand kritisch! Bald bestellen!
         </div>
 
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-6 relative">
             
             <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-blue-300">Timo</h2>
+                    <h2 class="text-lg font-semibold text-blue-300">Ich</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="updateStock('me', -1)" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
+                    <button id="btn-me-minus" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
                         <i class="fa-solid fa-minus"></i>
                     </button>
-                    <span id="count-me" class="text-2xl font-bold w-8 text-center">0</span>
-                    <button onclick="updateStock('me', 1)" class="btn-press w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-400 flex items-center justify-center shadow-lg shadow-blue-500/30 transition">
+                    <span id="count-me" class="text-2xl font-bold w-8 text-center loading-pulse">--</span>
+                    <button id="btn-me-plus" class="btn-press w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-400 flex items-center justify-center shadow-lg shadow-blue-500/30 transition">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
@@ -47,15 +49,15 @@
 
             <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-purple-300">Larissa</h2>
+                    <h2 class="text-lg font-semibold text-purple-300">Freundin</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="updateStock('her', -1)" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
+                    <button id="btn-her-minus" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
                         <i class="fa-solid fa-minus"></i>
                     </button>
-                    <span id="count-her" class="text-2xl font-bold w-8 text-center">0</span>
-                    <button onclick="updateStock('her', 1)" class="btn-press w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-400 flex items-center justify-center shadow-lg shadow-purple-500/30 transition">
+                    <span id="count-her" class="text-2xl font-bold w-8 text-center loading-pulse">--</span>
+                    <button id="btn-her-plus" class="btn-press w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-400 flex items-center justify-center shadow-lg shadow-purple-500/30 transition">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
@@ -64,7 +66,7 @@
             <div class="pt-4 border-t border-slate-700 flex justify-between items-end">
                 <div>
                     <p class="text-slate-400 text-sm">Gesamtbestand</p>
-                    <h3 class="text-3xl font-bold text-white"><span id="total-count">0</span> <span class="text-base font-normal text-slate-500">Flaschen</span></h3>
+                    <h3 class="text-3xl font-bold text-white"><span id="total-count">--</span> <span class="text-base font-normal text-slate-500">Flaschen</span></h3>
                 </div>
                 <i class="fa-solid fa-box-open text-4xl text-slate-700"></i>
             </div>
@@ -77,46 +79,101 @@
         </div>
     </div>
 
-    <script>
-        // Initiale Werte laden oder auf 0 setzen
-        let stocks = {
-            me: parseInt(localStorage.getItem('stock_me')) || 0,
-            her: parseInt(localStorage.getItem('stock_her')) || 0
+    <script type="module">
+        // Importiere die notwendigen Firebase Module
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --------------------------------------------------------------
+        // TODO: HIER DEINE NEUE FIREBASE CONFIG EINFÜGEN
+        // --------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4I2yeXzLR0FQ8Nk8q4xRa0NDDX2dAOlo",
+            authDomain: "liquid-tracker-bf87b.firebaseapp.com",
+            projectId: "liquid-tracker-bf87b",
+            storageBucket: "liquid-tracker-bf87b.firebasestorage.app",
+            messagingSenderId: "1084643713298",
+            appId: "1:1084643713298:web:9f5d681e1fca33465e13cb"
         };
 
-        // UI beim Laden aktualisieren
-        updateUI();
+        // App initialisieren
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        function updateStock(person, change) {
-            // Wert ändern
-            stocks[person] += change;
-            
-            // Nicht unter 0 gehen lassen
-            if (stocks[person] < 0) stocks[person] = 0;
+        // Referenz zum Dokument (Collection: "tracker", Document: "liquid")
+        const docRef = doc(db, "tracker", "liquid");
 
-            // Speichern (Lokal)
-            localStorage.setItem('stock_me', stocks.me);
-            localStorage.setItem('stock_her', stocks.her);
+        // Elemente laden
+        const countMeEl = document.getElementById('count-me');
+        const countHerEl = document.getElementById('count-her');
+        const totalCountEl = document.getElementById('total-count');
+        const bannerEl = document.getElementById('status-banner');
+        const statusEl = document.getElementById('connection-status');
 
-            updateUI();
-        }
+        let currentData = { me: 0, her: 0 };
 
-        function updateUI() {
-            // Zahlen aktualisieren
-            document.getElementById('count-me').innerText = stocks.me;
-            document.getElementById('count-her').innerText = stocks.her;
-            
-            const total = stocks.me + stocks.her;
-            document.getElementById('total-count').innerText = total;
-
-            // Warnung anzeigen, wenn weniger als 3 Flaschen insgesamt
-            const banner = document.getElementById('status-banner');
-            if (total <= 3) {
-                banner.classList.remove('hidden');
+        // 1. ECHTZEIT LISTENER (Hört auf Änderungen in der Datenbank)
+        onSnapshot(docRef, async (docSnap) => {
+            if (docSnap.exists()) {
+                // Daten sind da
+                currentData = docSnap.data();
+                updateDisplay();
+                statusEl.innerText = "Live synchronisiert ✅";
+                statusEl.className = "text-green-300 text-xs mt-1 font-semibold";
             } else {
-                banner.classList.add('hidden');
+                // Dokument existiert noch nicht (erster Start), wir erstellen es
+                await setDoc(docRef, { me: 5, her: 5 });
+                console.log("Datenbank initiiert!");
             }
+        }, (error) => {
+            console.error("Fehler:", error);
+            statusEl.innerText = "Verbindungsfehler ❌";
+        });
+
+        // 2. Anzeige aktualisieren
+        function updateDisplay() {
+            // Ladeanimation entfernen
+            countMeEl.classList.remove('loading-pulse');
+            countHerEl.classList.remove('loading-pulse');
+
+            // Werte setzen
+            countMeEl.innerText = currentData.me;
+            countHerEl.innerText = currentData.her;
+            
+            const total = currentData.me + currentData.her;
+            totalCountEl.innerText = total;
+
+            // Warnung Logik
+            if (total <= 3) bannerEl.classList.remove('hidden');
+            else bannerEl.classList.add('hidden');
         }
+
+        // 3. Button Click Handler
+        window.changeStock = async (person, change) => {
+            const newData = { ...currentData };
+            newData[person] += change;
+            if (newData[person] < 0) newData[person] = 0;
+
+            // Optimistisches Update (damit es sich sofort schnell anfühlt)
+            currentData = newData; 
+            updateDisplay();
+
+            // An Firebase senden
+            try {
+                await updateDoc(docRef, { [person]: newData[person] });
+            } catch (e) {
+                console.error("Update fehlgeschlagen", e);
+                // Bei Fehler zurücksetzen passiert automatisch durch onSnapshot
+            }
+        };
+
+        // Event Listeners hinzufügen (da Modul-Script keinen direkten HTML onclick erlaubt)
+        document.getElementById('btn-me-minus').addEventListener('click', () => changeStock('me', -1));
+        document.getElementById('btn-me-plus').addEventListener('click', () => changeStock('me', 1));
+        document.getElementById('btn-her-minus').addEventListener('click', () => changeStock('her', -1));
+        document.getElementById('btn-her-plus').addEventListener('click', () => changeStock('her', 1));
+
     </script>
 </body>
 </html>
