@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Tracker 💧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Sanfte Animation für Buttons */
+        .btn-press:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700">
+        
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center">
+            <h1 class="text-2xl font-bold tracking-wider uppercase">Liquid Lager</h1>
+            <p class="text-blue-100 text-sm opacity-80 mt-1">Niemals auf dem Trockenen sitzen</p>
+        </div>
+
+        <div id="status-banner" class="hidden bg-red-500/20 text-red-200 p-3 text-center text-sm font-semibold border-b border-red-500/20">
+            ⚠️ Bestand kritisch! Bald bestellen!
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-300">Ich</h2>
+                    <p class="text-xs text-slate-400">Vorrat</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="updateStock('me', -1)" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="count-me" class="text-2xl font-bold w-8 text-center">0</span>
+                    <button onclick="updateStock('me', 1)" class="btn-press w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-400 flex items-center justify-center shadow-lg shadow-blue-500/30 transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-purple-300">Freundin</h2>
+                    <p class="text-xs text-slate-400">Vorrat</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="updateStock('her', -1)" class="btn-press w-10 h-10 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="count-her" class="text-2xl font-bold w-8 text-center">0</span>
+                    <button onclick="updateStock('her', 1)" class="btn-press w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-400 flex items-center justify-center shadow-lg shadow-purple-500/30 transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-700 flex justify-between items-end">
+                <div>
+                    <p class="text-slate-400 text-sm">Gesamtbestand</p>
+                    <h3 class="text-3xl font-bold text-white"><span id="total-count">0</span> <span class="text-base font-normal text-slate-500">Flaschen</span></h3>
+                </div>
+                <i class="fa-solid fa-box-open text-4xl text-slate-700"></i>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 p-4 text-center">
+            <a href="https://www.google.com/search?q=liquid+kaufen" target="_blank" class="block w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700">
+                🛒 Jetzt Liquid suchen
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Initiale Werte laden oder auf 0 setzen
+        let stocks = {
+            me: parseInt(localStorage.getItem('stock_me')) || 0,
+            her: parseInt(localStorage.getItem('stock_her')) || 0
+        };
+
+        // UI beim Laden aktualisieren
+        updateUI();
+
+        function updateStock(person, change) {
+            // Wert ändern
+            stocks[person] += change;
+            
+            // Nicht unter 0 gehen lassen
+            if (stocks[person] < 0) stocks[person] = 0;
+
+            // Speichern (Lokal)
+            localStorage.setItem('stock_me', stocks.me);
+            localStorage.setItem('stock_her', stocks.her);
+
+            updateUI();
+        }
+
+        function updateUI() {
+            // Zahlen aktualisieren
+            document.getElementById('count-me').innerText = stocks.me;
+            document.getElementById('count-her').innerText = stocks.her;
+            
+            const total = stocks.me + stocks.her;
+            document.getElementById('total-count').innerText = total;
+
+            // Warnung anzeigen, wenn weniger als 3 Flaschen insgesamt
+            const banner = document.getElementById('status-banner');
+            if (total <= 3) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
