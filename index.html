@@ -11,18 +11,17 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .btn-press:active { transform: scale(0.95); }
-        /* Lade-Animation */
         .loading-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700 relative">
+    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700 relative pb-6">
         
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center relative z-10">
             <h1 class="text-2xl font-bold tracking-wider uppercase">Liquid Lager</h1>
-            <p id="connection-status" class="text-blue-100 text-xs opacity-80 mt-1">Verbinde mit Firebase...</p>
+            <p id="connection-status" class="text-blue-100 text-xs opacity-80 mt-1">Verbinde...</p>
         </div>
 
         <div id="status-banner" class="hidden bg-red-500/20 text-red-200 p-3 text-center text-sm font-semibold border-b border-red-500/20 transition-all">
@@ -31,9 +30,9 @@
 
         <div class="p-6 space-y-6 relative">
             
-            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
+            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between border border-slate-600/50">
                 <div>
-                    <h2 class="text-lg font-semibold text-blue-300">Timo</h2>
+                    <h2 class="text-lg font-semibold text-blue-300">Ich</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -47,9 +46,9 @@
                 </div>
             </div>
 
-            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between">
+            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between border border-slate-600/50">
                 <div>
-                    <h2 class="text-lg font-semibold text-purple-300">Larissa</h2>
+                    <h2 class="text-lg font-semibold text-purple-300">Freundin</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -63,30 +62,49 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-700 flex justify-between items-end">
+            <div class="flex justify-between items-end px-2">
                 <div>
                     <p class="text-slate-400 text-sm">Gesamtbestand</p>
                     <h3 class="text-3xl font-bold text-white"><span id="total-count">--</span> <span class="text-base font-normal text-slate-500">Flaschen</span></h3>
                 </div>
-                <i class="fa-solid fa-box-open text-4xl text-slate-700"></i>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <div>
+                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-green-400"></i> Wunschliste
+                </h3>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="wishlist-input" placeholder="Z.B. Erdbeer, Ice..." 
+                           class="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 border border-slate-600 focus:outline-none focus:border-green-500 transition shadow-inner">
+                    <button id="btn-add-wish" class="bg-green-600 hover:bg-green-500 text-white px-5 rounded-xl font-bold transition shadow-lg shadow-green-500/20 active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <ul id="wishlist-container" class="space-y-2">
+                    <li class="text-slate-500 text-sm text-center italic py-2">Lade Liste...</li>
+                </ul>
             </div>
         </div>
 
-        <div class="bg-slate-900 p-4 text-center">
-            <a href="https://www.vapevo.com/de?srsltid=AfmBOoqDX2BinHClsciFwq8QoHTV5FocNp2fpTA7vpTr_hlvQKZkKkpq" target="_blank" class="block w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700">
-                🛒 Jetzt Liquid bestellen
+        <div class="bg-slate-900 p-4 text-center mt-2 border-t border-slate-800">
+            <a href="https://www.google.com/search?q=liquid+kaufen" target="_blank" class="block w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700">
+                🛒 Jetzt bestellen
             </a>
         </div>
     </div>
 
     <script type="module">
-        // Importiere die notwendigen Firebase Module
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } 
+        // WICHTIG: arrayUnion und arrayRemove wurden hier hinzugefügt
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, arrayUnion, arrayRemove } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // --------------------------------------------------------------
-        // TODO: HIER DEINE NEUE FIREBASE CONFIG EINFÜGEN
+        // TODO: HIER DEINE FIREBASE CONFIG WIEDER EINFÜGEN
         // --------------------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyC4I2yeXzLR0FQ8Nk8q4xRa0NDDX2dAOlo",
@@ -97,82 +115,124 @@
             appId: "1:1084643713298:web:9f5d681e1fca33465e13cb"
         };
 
-        // App initialisieren
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // Referenz zum Dokument (Collection: "tracker", Document: "liquid")
         const docRef = doc(db, "tracker", "liquid");
 
-        // Elemente laden
+        // UI Elemente
         const countMeEl = document.getElementById('count-me');
         const countHerEl = document.getElementById('count-her');
         const totalCountEl = document.getElementById('total-count');
         const bannerEl = document.getElementById('status-banner');
         const statusEl = document.getElementById('connection-status');
+        const wishlistEl = document.getElementById('wishlist-container');
+        const inputEl = document.getElementById('wishlist-input');
 
-        let currentData = { me: 0, her: 0 };
+        let currentData = { me: 0, her: 0, shoppingList: [] };
 
-        // 1. ECHTZEIT LISTENER (Hört auf Änderungen in der Datenbank)
+        // 1. ECHTZEIT LISTENER
         onSnapshot(docRef, async (docSnap) => {
             if (docSnap.exists()) {
-                // Daten sind da
                 currentData = docSnap.data();
                 updateDisplay();
                 statusEl.innerText = "Live synchronisiert ✅";
                 statusEl.className = "text-green-300 text-xs mt-1 font-semibold";
             } else {
-                // Dokument existiert noch nicht (erster Start), wir erstellen es
-                await setDoc(docRef, { me: 5, her: 5 });
-                console.log("Datenbank initiiert!");
+                // Falls DB leer ist, erstelle Standardstruktur
+                await setDoc(docRef, { me: 5, her: 5, shoppingList: [] });
             }
         }, (error) => {
             console.error("Fehler:", error);
             statusEl.innerText = "Verbindungsfehler ❌";
         });
 
-        // 2. Anzeige aktualisieren
+        // 2. Anzeige aktualisieren (Zahlen + Liste)
         function updateDisplay() {
-            // Ladeanimation entfernen
+            // Zahlen
             countMeEl.classList.remove('loading-pulse');
             countHerEl.classList.remove('loading-pulse');
-
-            // Werte setzen
-            countMeEl.innerText = currentData.me;
-            countHerEl.innerText = currentData.her;
-            
-            const total = currentData.me + currentData.her;
+            countMeEl.innerText = currentData.me || 0;
+            countHerEl.innerText = currentData.her || 0;
+            const total = (currentData.me || 0) + (currentData.her || 0);
             totalCountEl.innerText = total;
 
-            // Warnung Logik
             if (total <= 3) bannerEl.classList.remove('hidden');
             else bannerEl.classList.add('hidden');
+
+            // Wunschliste rendern
+            wishlistEl.innerHTML = ''; // Liste leeren
+            const items = currentData.shoppingList || [];
+
+            if (items.length === 0) {
+                wishlistEl.innerHTML = '<li class="text-slate-600 text-sm text-center py-2">Liste ist leer</li>';
+            } else {
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-sm";
+                    
+                    // Wir bauen das HTML für das Item sicher zusammen
+                    // Linke Seite: Text
+                    const span = document.createElement('span');
+                    span.innerText = item;
+                    span.className = "font-medium text-slate-200";
+                    
+                    // Rechte Seite: Löschen Button
+                    const delBtn = document.createElement('button');
+                    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    delBtn.className = "text-slate-500 hover:text-red-400 transition p-2";
+                    delBtn.onclick = () => deleteWish(item); // Klick-Event
+
+                    li.appendChild(span);
+                    li.appendChild(delBtn);
+                    wishlistEl.appendChild(li);
+                });
+            }
         }
 
-        // 3. Button Click Handler
+        // 3. Logik Funktionen
         window.changeStock = async (person, change) => {
-            const newData = { ...currentData };
-            newData[person] += change;
-            if (newData[person] < 0) newData[person] = 0;
+            const currentVal = currentData[person] || 0;
+            let newVal = currentVal + change;
+            if (newVal < 0) newVal = 0;
 
-            // Optimistisches Update (damit es sich sofort schnell anfühlt)
-            currentData = newData; 
+            // Optimistisches Update für die UI
+            currentData[person] = newVal;
             updateDisplay();
 
-            // An Firebase senden
-            try {
-                await updateDoc(docRef, { [person]: newData[person] });
-            } catch (e) {
-                console.error("Update fehlgeschlagen", e);
-                // Bei Fehler zurücksetzen passiert automatisch durch onSnapshot
-            }
+            await updateDoc(docRef, { [person]: newVal });
         };
 
-        // Event Listeners hinzufügen (da Modul-Script keinen direkten HTML onclick erlaubt)
+        // Neues Item hinzufügen
+        window.addWish = async () => {
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            inputEl.value = ''; // Feld leeren
+            // An Firebase senden (arrayUnion fügt hinzu, verhindert aber Duplikate)
+            await updateDoc(docRef, {
+                shoppingList: arrayUnion(text)
+            });
+        };
+
+        // Item löschen
+        window.deleteWish = async (text) => {
+            // Aus Firebase entfernen
+            await updateDoc(docRef, {
+                shoppingList: arrayRemove(text)
+            });
+        };
+
+        // Event Listeners
         document.getElementById('btn-me-minus').addEventListener('click', () => changeStock('me', -1));
         document.getElementById('btn-me-plus').addEventListener('click', () => changeStock('me', 1));
         document.getElementById('btn-her-minus').addEventListener('click', () => changeStock('her', -1));
         document.getElementById('btn-her-plus').addEventListener('click', () => changeStock('her', 1));
+        
+        document.getElementById('btn-add-wish').addEventListener('click', addWish);
+        // Auch Enter-Taste im Eingabefeld erlauben
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addWish();
+        });
 
     </script>
 </body>
