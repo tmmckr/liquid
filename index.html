@@ -9,28 +9,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* HIER IST DIE ÄNDERUNG: */
+            /* Wir laden vape.jpg und legen eine 85% dunkle Ebene darüber (rgba), damit es edel aussieht */
+            background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('vape.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Das Bild bleibt stehen beim Scrollen */
+        }
         .btn-press:active { transform: scale(0.95); }
         .loading-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        /* Macht die Hauptkarte etwas durchsichtig für einen coolen "Glass"-Effekt */
+        .glass-card {
+            background-color: rgba(30, 41, 59, 0.85); /* Slate-800 aber durchsichtig */
+            backdrop-filter: blur(10px); /* Verschwimmt den Hintergrund hinter der Karte leicht */
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+<body class="text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-700 relative pb-6">
+    <div class="glass-card max-w-md w-full rounded-3xl shadow-2xl overflow-hidden border border-slate-700/50 relative pb-6">
         
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center relative z-10">
-            <h1 class="text-2xl font-bold tracking-wider uppercase">Liquid Lager</h1>
+        <div class="bg-gradient-to-r from-blue-600/90 to-purple-600/90 p-6 text-center relative z-10">
+            <h1 class="text-2xl font-bold tracking-wider uppercase drop-shadow-md">Liquid Lager</h1>
             <p id="connection-status" class="text-blue-100 text-xs opacity-80 mt-1">Verbinde...</p>
         </div>
 
-        <div id="status-banner" class="hidden bg-red-500/20 text-red-200 p-3 text-center text-sm font-semibold border-b border-red-500/20 transition-all">
+        <div id="status-banner" class="hidden bg-red-500/30 text-red-100 p-3 text-center text-sm font-semibold border-b border-red-500/20 transition-all backdrop-blur-sm">
             ⚠️ Bestand kritisch! Bald bestellen!
         </div>
 
         <div class="p-6 space-y-6 relative">
             
-            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between border border-slate-600/50">
+            <div class="bg-slate-700/40 rounded-2xl p-4 flex items-center justify-between border border-slate-600/30">
                 <div>
                     <h2 class="text-lg font-semibold text-blue-300">Timo</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
@@ -46,7 +60,7 @@
                 </div>
             </div>
 
-            <div class="bg-slate-700/50 rounded-2xl p-4 flex items-center justify-between border border-slate-600/50">
+            <div class="bg-slate-700/40 rounded-2xl p-4 flex items-center justify-between border border-slate-600/30">
                 <div>
                     <h2 class="text-lg font-semibold text-purple-300">Larissa</h2>
                     <p class="text-xs text-slate-400">Vorrat</p>
@@ -65,20 +79,20 @@
             <div class="flex justify-between items-end px-2">
                 <div>
                     <p class="text-slate-400 text-sm">Gesamtbestand</p>
-                    <h3 class="text-3xl font-bold text-white"><span id="total-count">--</span> <span class="text-base font-normal text-slate-500">Flaschen</span></h3>
+                    <h3 class="text-3xl font-bold text-white drop-shadow-sm"><span id="total-count">--</span> <span class="text-base font-normal text-slate-400">Flaschen</span></h3>
                 </div>
             </div>
 
-            <hr class="border-slate-700">
+            <hr class="border-slate-700/50">
 
             <div>
-                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2 drop-shadow-sm">
                     <i class="fa-solid fa-cart-shopping text-green-400"></i> Wunschliste
                 </h3>
                 
                 <div class="flex gap-2 mb-4">
                     <input type="text" id="wishlist-input" placeholder="Z.B. Erdbeer, Ice..." 
-                           class="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 border border-slate-600 focus:outline-none focus:border-green-500 transition shadow-inner">
+                           class="flex-1 bg-slate-900/60 text-white rounded-xl px-4 py-3 border border-slate-600 focus:outline-none focus:border-green-500 transition shadow-inner placeholder-slate-500">
                     <button id="btn-add-wish" class="bg-green-600 hover:bg-green-500 text-white px-5 rounded-xl font-bold transition shadow-lg shadow-green-500/20 active:scale-95">
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -90,8 +104,8 @@
             </div>
         </div>
 
-        <div class="bg-slate-900 p-4 text-center mt-2 border-t border-slate-800">
-            <a href="https://www.google.com/search?q=liquid+kaufen" target="_blank" class="block w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700">
+        <div class="bg-slate-900/50 p-4 text-center mt-2 border-t border-slate-800/50">
+            <a href="https://www.vapevo.com/de?srsltid=AfmBOoqr5BUOIppdLgicoNK-cw_qLWIFsau8JXAxfiUASOWuJbNcBmDV" target="_blank" class="block w-full py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700 hover:border-slate-500">
                 🛒 Jetzt bestellen
             </a>
         </div>
@@ -99,13 +113,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // WICHTIG: arrayUnion und arrayRemove wurden hier hinzugefügt
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc, arrayUnion, arrayRemove } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --------------------------------------------------------------
-        // TODO: HIER DEINE FIREBASE CONFIG WIEDER EINFÜGEN
-        // --------------------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyC4I2yeXzLR0FQ8Nk8q4xRa0NDDX2dAOlo",
             authDomain: "liquid-tracker-bf87b.firebaseapp.com",
@@ -138,7 +148,6 @@
                 statusEl.innerText = "Live synchronisiert ✅";
                 statusEl.className = "text-green-300 text-xs mt-1 font-semibold";
             } else {
-                // Falls DB leer ist, erstelle Standardstruktur
                 await setDoc(docRef, { me: 5, her: 5, shoppingList: [] });
             }
         }, (error) => {
@@ -146,9 +155,8 @@
             statusEl.innerText = "Verbindungsfehler ❌";
         });
 
-        // 2. Anzeige aktualisieren (Zahlen + Liste)
+        // 2. Anzeige aktualisieren
         function updateDisplay() {
-            // Zahlen
             countMeEl.classList.remove('loading-pulse');
             countHerEl.classList.remove('loading-pulse');
             countMeEl.innerText = currentData.me || 0;
@@ -160,27 +168,25 @@
             else bannerEl.classList.add('hidden');
 
             // Wunschliste rendern
-            wishlistEl.innerHTML = ''; // Liste leeren
+            wishlistEl.innerHTML = ''; 
             const items = currentData.shoppingList || [];
 
             if (items.length === 0) {
-                wishlistEl.innerHTML = '<li class="text-slate-600 text-sm text-center py-2">Liste ist leer</li>';
+                wishlistEl.innerHTML = '<li class="text-slate-400 text-sm text-center py-2 opacity-70">Wunschliste leer</li>';
             } else {
                 items.forEach(item => {
                     const li = document.createElement('li');
-                    li.className = "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-sm";
+                    // Leicht transparenter Hintergrund für die Listen-Items
+                    li.className = "flex justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-600/50 shadow-sm backdrop-blur-sm";
                     
-                    // Wir bauen das HTML für das Item sicher zusammen
-                    // Linke Seite: Text
                     const span = document.createElement('span');
                     span.innerText = item;
                     span.className = "font-medium text-slate-200";
                     
-                    // Rechte Seite: Löschen Button
                     const delBtn = document.createElement('button');
                     delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
                     delBtn.className = "text-slate-500 hover:text-red-400 transition p-2";
-                    delBtn.onclick = () => deleteWish(item); // Klick-Event
+                    delBtn.onclick = () => deleteWish(item); 
 
                     li.appendChild(span);
                     li.appendChild(delBtn);
@@ -194,32 +200,20 @@
             const currentVal = currentData[person] || 0;
             let newVal = currentVal + change;
             if (newVal < 0) newVal = 0;
-
-            // Optimistisches Update für die UI
             currentData[person] = newVal;
             updateDisplay();
-
             await updateDoc(docRef, { [person]: newVal });
         };
 
-        // Neues Item hinzufügen
         window.addWish = async () => {
             const text = inputEl.value.trim();
             if (!text) return;
-
-            inputEl.value = ''; // Feld leeren
-            // An Firebase senden (arrayUnion fügt hinzu, verhindert aber Duplikate)
-            await updateDoc(docRef, {
-                shoppingList: arrayUnion(text)
-            });
+            inputEl.value = ''; 
+            await updateDoc(docRef, { shoppingList: arrayUnion(text) });
         };
 
-        // Item löschen
         window.deleteWish = async (text) => {
-            // Aus Firebase entfernen
-            await updateDoc(docRef, {
-                shoppingList: arrayRemove(text)
-            });
+            await updateDoc(docRef, { shoppingList: arrayRemove(text) });
         };
 
         // Event Listeners
@@ -227,9 +221,7 @@
         document.getElementById('btn-me-plus').addEventListener('click', () => changeStock('me', 1));
         document.getElementById('btn-her-minus').addEventListener('click', () => changeStock('her', -1));
         document.getElementById('btn-her-plus').addEventListener('click', () => changeStock('her', 1));
-        
         document.getElementById('btn-add-wish').addEventListener('click', addWish);
-        // Auch Enter-Taste im Eingabefeld erlauben
         inputEl.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addWish();
         });
